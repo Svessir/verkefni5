@@ -43,7 +43,7 @@ class ObserverBoard(Board):
         If the connection is lost to the player board the connection
         loss will be handled.
 
-        :return:
+        :return: None
         """
         while True:
             self._receive_new_state()
