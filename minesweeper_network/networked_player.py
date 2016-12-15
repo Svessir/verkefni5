@@ -3,6 +3,18 @@ import socket
 import select
 import threading
 
+class NetworkedPlayerError(Exception):
+    """
+    Error class dedicated to Networked Player errors
+    """
+
+    def __init__(self, msg):
+        """
+        Constructs an error with error message
+        :param msg: The message of this error.
+        """
+        super(NetworkedPlayerError, self).__init__(msg)
+
 class NetworkedPlayer:
     """
     The networked player class starts a thread
@@ -18,17 +30,20 @@ class NetworkedPlayer:
         :param host: The ip address of the host
         :param port: The port number
         """
-        self.state = ""
-        self.sockets = []
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server_socket.bind((host,port))
-        self.server_socket.listen(10)
-        self.sockets.append(self.server_socket)
-        self.thread = threading.Thread(target=self.server_loop)
-        self.thread.daemon = True
-        self.is_server_on = False
-        self.thread.start()
+        try:
+            self.state = ""
+            self.sockets = []
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server_socket.bind((host, port))
+            self.server_socket.listen(10)
+            self.sockets.append(self.server_socket)
+            self.thread = threading.Thread(target=self.server_loop)
+            self.thread.daemon = True
+            self.is_server_on = False
+            self.thread.start()
+        except Exception as error:
+            raise NetworkedPlayerError("Could not start player server:{0}".format(str(error)))
 
     def server_loop(self):
         """
