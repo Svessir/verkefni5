@@ -148,12 +148,13 @@ class MinesweeperBoard(Board):
         """
         self._is_game_over = False
         self._current_state = self._CONTINUE
-        for cell in self._cells:
+        cells = list(chain(*self._cells))
+        for cell in cells:
             cell.is_hidden = True
             cell.is_marked = False
             cell.is_bomb = False
             cell.is_exploded = False
         self._insert_bombs()
-        for cell in self._cells:
+        for cell in cells:
             cell.count_bomb_neighbours()
         self._update_state()
