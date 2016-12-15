@@ -38,7 +38,7 @@ class NetworkedPlayer:
         :return: None
         """
         while True:
-            ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 0)
+            ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 10)
             for sock in ready_to_read:
                 if sock == self.server_socket:
                     sock_fd, address = self.server_socket.accept()

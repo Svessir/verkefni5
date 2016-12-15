@@ -103,6 +103,7 @@ class MinesweeperBoard(Board):
         """
         for bomb in self._bombs:
             bomb.is_hidden = False
+            bomb.is_marked = False
 
     def _get_mark_count_left(self):
         """
