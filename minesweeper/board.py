@@ -23,6 +23,7 @@ class Board:
         :return: None
         """
         self._observers.add(observer)
+        observer(self._state)
 
     def step_on_cell(self, position):
         """
