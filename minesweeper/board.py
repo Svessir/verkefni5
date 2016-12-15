@@ -1,3 +1,10 @@
+class BoardError(Exception):
+    """
+    Error class dedicated to Board errors
+    """
+    def __init__(self, msg):
+        super(BoardError, self).__init__(msg)
+
 class Board:
     """
     Layered supertype for a minesweeper board.

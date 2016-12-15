@@ -1,50 +1,49 @@
-import tkinter as tk   # python3
+import tkinter as tk  # python3
 from minesweeper.minesweeper_board import MinesweeperBoard
 from PIL import Image, ImageTk
 from tkinter import PhotoImage
-#from minesweeperUI import Application
+# from minesweeperUI import Application
 from minesweeper_network.observer_board import ObserverBoard
 from minesweeper_network.networked_player import NetworkedPlayer
 from tkinter import messagebox
 import time
-	 
+
 
 class Minesweeper(tk.Tk):
-	def __init__(self, *args, **kwargs):
-		tk.Tk.__init__(self, *args, **kwargs)
-		container = tk.Frame(self)
-		
-		container.pack(side='top', fill='both', expand=True)
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        container = tk.Frame(self)
 
-		container.grid_rowconfigure(0, weight=1)
-		container.grid_columnconfigure(0, weight=1)
+        container.pack(side='top', fill='both', expand=True)
 
-		self.frames = {}
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
-		for F in (StartingPage, SelectLevelPage, ObserverPage):
-			frame = F(container, self)
-			self.frames[F] = frame
-			frame.grid(row=0, column=0, sticky='nsew')
+        self.frames = {}
 
-		self.show_frame(StartingPage)
+        for F in (StartingPage, SelectLevelPage, ObserverPage):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky='nsew')
 
-	def show_frame(self, cont):
-		frame = self.frames[cont]
-		frame.tkraise()
+        self.show_frame(StartingPage)
 
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
 
 
 class StartingPage(tk.Frame):
     def __init__(self, master, controller):
-    	tk.Frame.__init__(self, master)
-    	minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
-    	minesweeper_label.pack(padx=10, pady=10)
-    	new_game_button = tk.Button(self, text='New Game', bg='#CCCCCC', 
-    		command=lambda: controller.show_frame(SelectLevelPage))
-    	new_game_button.pack()
-    	observer_button = tk.Button(self, text='Observer', bg='#CCCCCC', 
-    		command=lambda: controller.show_frame(ObserverPage))
-    	observer_button.pack()
+        tk.Frame.__init__(self, master)
+        minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
+        minesweeper_label.pack(padx=10, pady=10)
+        new_game_button = tk.Button(self, text='New Game', bg='#CCCCCC',
+                                    command=lambda: controller.show_frame(SelectLevelPage))
+        new_game_button.pack()
+        observer_button = tk.Button(self, text='Observer', bg='#CCCCCC',
+                                    command=lambda: controller.show_frame(ObserverPage))
+        observer_button.pack()
 
 
 class SelectLevelPage(tk.Frame):
@@ -191,29 +190,21 @@ class MinesweeperGameUI(tk.Frame):
 
 
 
+
 class ObserverPage(tk.Frame):
-	def __init__(self, master, controller):
-		super().__init__(master)
-		minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
-		minesweeper_label.pack(padx=10, pady=10)
-		players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
-		players_label.pack(padx=10, pady=10)
-		observe = tk.Button(self, text='Observe', bg='#CCCCCC', 
-			command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 80)))
-		observe.pack()
+    def __init__(self, master, controller):
+        super().__init__(master)
+        minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
+        minesweeper_label.pack(padx=10, pady=10)
+        players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
+        players_label.pack(padx=10, pady=10)
+        observe = tk.Button(self, text='Observe', bg='#CCCCCC',
+                            command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 80)))
+        observe.pack()
 
-		back = tk.Button(self, text='Back', bg='#CCCCCC', 
-			command=lambda: controller.show_frame(StartingPage))
-		back.pack()
-
-class MinesweeperGame(tk.Frame):
-	def __init__(self, master, controller, size):
-		tk.Frame.__init__(self, master)
-		self.height = size
-		self.width = size
-		print(size)
+        back = tk.Button(self, text='Back', bg='#CCCCCC',
+                         command=lambda: controller.show_frame(StartingPage))
+        back.pack()
 
 app = Minesweeper()
 app.mainloop()
-
-
