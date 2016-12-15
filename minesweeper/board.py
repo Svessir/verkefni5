@@ -6,6 +6,7 @@ class Board:
     def __init__(self):
         self._observers = set()
         self._state = None
+
     def _notify_observers(self):
         """
         Notifies observers with the current state of the board.
