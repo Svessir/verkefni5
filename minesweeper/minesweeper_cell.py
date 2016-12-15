@@ -25,7 +25,7 @@ class MinesweeperCell:
         :return: None
         """
         self._neighbours = neighbours
-        self._number_of_bomb_neighbours = sum([1 for neighbour in self._neighbours if neighbour.is_bomb])
+        self.count_bomb_neighbours()
 
     def mark_toggle(self):
         """
@@ -55,6 +55,16 @@ class MinesweeperCell:
                     for neighbour in self._neighbours:
                         neighbour.is_marked = False
                         neighbour.step_on()
+
+    def count_bomb_neighbours(self):
+        """
+        Count the number of bomb neigbours for this cell
+        and assign it to the cell.
+
+        :return: None
+        """
+        self._number_of_bomb_neighbours = sum([1 for neighbour in self._neighbours if neighbour.is_bomb])
+        print(self._number_of_bomb_neighbours)
 
     def __str__(self):
         """

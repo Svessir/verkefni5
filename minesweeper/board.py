@@ -52,3 +52,11 @@ class Board:
         :return: None
         """
         pass
+
+    def reset(self):
+        """
+        Abstract method for resetting the board.
+
+        :return: None
+        """
+        pass

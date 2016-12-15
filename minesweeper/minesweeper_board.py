@@ -27,15 +27,8 @@ class MinesweeperBoard(Board):
         self._WIN = "win"
         self._LOSS = "loss"
         self._current_state = self._CONTINUE
-        cells = list(chain(*self._cells))
+        self._insert_bombs()
 
-        # Inserts bombs
-        for i in range(self._number_of_bombs):
-            index = randint(0, len(cells) - 1)
-            bomb = cells[index]
-            bomb.is_bomb = True
-            cells.remove(cells[index])
-            self._bombs.append(bomb)
         for r in range(rows):
             for c in range(columns):
                 cell = self._cells[r][c]
@@ -95,6 +88,7 @@ class MinesweeperBoard(Board):
         """
         old_state = self._state
         str_state = "/".join(["".join([str(col) for col in row]) for row in self._cells])
+        print(str_state)
         str_marks_left = str(self._get_mark_count_left())
         self._state = ",".join([self._current_state, str_marks_left, str_state])
         if old_state != self._state:
@@ -129,3 +123,37 @@ class MinesweeperBoard(Board):
         is_win = sum([sum([1 for c in row if c.is_marked and c.is_bomb]) for row in self._cells]) == self._number_of_bombs
         self._current_state = self._WIN if is_win else self._current_state
         return is_win
+
+    def _insert_bombs(self):
+        """
+        Inserts bombs randomly to the current board
+        by assigning cells randomly as bombs.
+
+        :return: None
+        """
+        self._bombs = []
+        cells = list(chain(*self._cells))
+        for i in range(self._number_of_bombs):
+            index = randint(0, len(cells) - 1)
+            bomb = cells[index]
+            bomb.is_bomb = True
+            cells.remove(cells[index])
+            self._bombs.append(bomb)
+
+    def reset(self):
+        """
+        Resets the state of the board to the initial state
+
+        :return: None
+        """
+        self._is_game_over = False
+        self._current_state = self._CONTINUE
+        for cell in self._cells:
+            cell.is_hidden = True
+            cell.is_marked = False
+            cell.is_bomb = False
+            cell.is_exploded = False
+        self._insert_bombs()
+        for cell in self._cells:
+            cell.count_bomb_neighbours()
+        self._update_state()
