@@ -109,8 +109,9 @@ class MinesweeperGameUI(tk.Frame):
 	def hax(self, event):
 		event.widget.config(relief=tk.SUNKEN)
 
-	def fill_board(self, state):
-		#terminal, number_of_flags, state = board_info.split(',')
+	def fill_board(self, board_info):
+		terminal, number_of_flags, state = board_info.split(',')
+		print(terminal, number_of_flags)
 		state = state.split('/')
 		print(state)
 		if not self.buttons :
@@ -123,16 +124,19 @@ class MinesweeperGameUI(tk.Frame):
 					self.buttons[(x,y)] = self.but
 					self.but.bind('<ButtonRelease-3>', self.right_click_event_handler)
 					self.but.bind('<ButtonRelease-1>', self.left_click_event_handler)
-		self.update_button_states(state)
+		self.update_button_states(board_info)
 			
 
-	def update_button_states(self, state):
+	def update_button_states(self, board_info):
+		terminal, number_of_flags, state = board_info.split(',')
+		state = state.split('/')
 		for x, row in enumerate(state) :
 			for y, col in enumerate(row) :	
 				self.but = self.buttons[(x,y)]
 				if str(col) != 'H':
 					if str(col) == '0':
-						self.but.config(state=tk.NORMAL, bg = '#EEEEEE', relief=tk.SUNKEN)
+						self.but.config(state=tk.NORMAL, bg = '#EEEEEE', relief=tk.SUNKEN, 
+							image='', height=2, width=5)
 					elif str(col) == 'X' :
 						self.but.config(image=self.bomb, height=35, width=38, bg='red')
 					elif str(col) == 'B' :
@@ -141,9 +145,16 @@ class MinesweeperGameUI(tk.Frame):
 						self.but.config(image=self.flag, height=35, width=38)
 					else :
 						self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
-							bg='#EEEEEE', relief=tk.SUNKEN)
+							bg='#EEEEEE', relief=tk.SUNKEN, image='', height=2, width=5)
 				else :
 					self.but.config(image='', height=2, width=5)
+		if terminal == 'loss':
+			self.on_exit()
+
+
+	def on_exit(self):
+		messagebox.showinfo("test", "test")
+		self.destroy() 
 
 
 class ObserverPage(tk.Frame):
@@ -173,7 +184,6 @@ def on_exit():
 	app.destroy() 
 
 app = Minesweeper()
-app.protocol("WM_DELETE_WINDOW", on_exit)
 app.mainloop()
 
 
