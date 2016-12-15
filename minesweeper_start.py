@@ -86,11 +86,11 @@ class MinesweeperGameUI(tk.Frame):
 		self.buttons = {}
 		self.bomb_path = "images/bomb.jpg"
 		self.bomb_image = Image.open(self.bomb_path)
-		self.bomb_image = self.bomb_image.resize((35,34), Image.ANTIALIAS)
+		self.bomb_image = self.bomb_image.resize((35,38), Image.ANTIALIAS)
 		self.bomb = ImageTk.PhotoImage(self.bomb_image)
 		self.flag_path = "images/flag_trans.jpg"
 		self.flag_image = Image.open(self.flag_path)
-		self.flag_image = self.flag_image.resize((35,34), Image.ANTIALIAS)
+		self.flag_image = self.flag_image.resize((35,38), Image.ANTIALIAS)
 		self.flag = ImageTk.PhotoImage(self.flag_image)
 		self.colors = ["white", "blue", "green", "red", "#AA00FF", "#002Eb8", "magenta", "#FF6633", "black"]
 		board.add_observer(self.fill_board)
@@ -103,14 +103,17 @@ class MinesweeperGameUI(tk.Frame):
 		print(event.widget.row, event.widget.col)
 		self.board.step_on_cell((event.widget.row, event.widget.col))
 		if event.widget['image'] == '' :
-			event.widget.config(relief=tk.SUNKEN)
+			self.after(5, lambda: event.widget.config(relief=tk.SUNKEN))
+			
 
 	def hax(self, event):
 		event.widget.config(relief=tk.SUNKEN)
 
-	def fill_board(self, state):
-		print(state)
+	def fill_board(self, board_info):
+		terminal, number_of_flags, state = board_info.split(',')
+		print(terminal, number_of_flags)
 		state = state.split('/')
+		print(state)
 		if not self.buttons :
 			for x, row in enumerate(state) :
 				for y, col in enumerate(row) :
@@ -121,27 +124,37 @@ class MinesweeperGameUI(tk.Frame):
 					self.buttons[(x,y)] = self.but
 					self.but.bind('<ButtonRelease-3>', self.right_click_event_handler)
 					self.but.bind('<ButtonRelease-1>', self.left_click_event_handler)
-		self.update_button_states(state)
+		self.update_button_states(board_info)
 			
 
-	def update_button_states(self, state):
+	def update_button_states(self, board_info):
+		terminal, number_of_flags, state = board_info.split(',')
+		state = state.split('/')
 		for x, row in enumerate(state) :
 			for y, col in enumerate(row) :	
 				self.but = self.buttons[(x,y)]
 				if str(col) != 'H':
 					if str(col) == '0':
-						self.but.config(state=tk.NORMAL, bg = '#EEEEEE', relief=tk.SUNKEN)
+						self.but.config(state=tk.NORMAL, bg = '#EEEEEE', relief=tk.SUNKEN, 
+							image='', height=2, width=5)
 					elif str(col) == 'X' :
-						self.but.config(image=self.bomb, width=35, height=35, bg='red')
+						self.but.config(image=self.bomb, height=35, width=38, bg='red')
 					elif str(col) == 'B' :
-						self.but.config(image=self.bomb, width=35, height=35)
+						self.but.config(image=self.bomb, height=35, width=38)
 					elif str(col) == 'M' :
-						self.but.config(image=self.flag, width=35, height=35)
+						self.but.config(image=self.flag, height=35, width=38)
 					else :
 						self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
-							bg='#EEEEEE', relief=tk.SUNKEN)
+							bg='#EEEEEE', relief=tk.SUNKEN, image='', height=2, width=5)
 				else :
 					self.but.config(image='', height=2, width=5)
+		if terminal == 'loss':
+			self.on_exit()
+
+
+	def on_exit(self):
+		messagebox.showinfo("test", "test")
+		self.destroy() 
 
 
 class ObserverPage(tk.Frame):
@@ -171,7 +184,6 @@ def on_exit():
 	app.destroy() 
 
 app = Minesweeper()
-app.protocol("WM_DELETE_WINDOW", on_exit)
 app.mainloop()
 
 
