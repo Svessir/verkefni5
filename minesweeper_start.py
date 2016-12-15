@@ -6,15 +6,8 @@ from tkinter import PhotoImage
 from minesweeper_network.observer_board import ObserverBoard
 from minesweeper_network.networked_player import NetworkedPlayer
 from tkinter import messagebox
-
-
-
-class MinesweeperHeader(tk.Frame):
-	def __init__(self, master):
-		tk.Frame.__init__(self, master)
-		minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
-		minesweeper_label.pack(padx=10, pady=10)
-		 
+import time
+	 
 
 class Minesweeper(tk.Tk):
 	def __init__(self, *args, **kwargs):
@@ -46,7 +39,6 @@ class StartingPage(tk.Frame):
     	tk.Frame.__init__(self, master)
     	minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
     	minesweeper_label.pack(padx=10, pady=10)
-    	minesweeper_label = MinesweeperHeader(master)
     	new_game_button = tk.Button(self, text='New Game', bg='#CCCCCC', 
     		command=lambda: controller.show_frame(SelectLevelPage))
     	new_game_button.pack()
@@ -79,21 +71,6 @@ class SelectLevelPage(tk.Frame):
 		label.pack()
 		self.net_player = None
 
-	#Never used
-	def create_widgets(self):
-		game = Application()
-		board = MinesweeperBoard(self.size, self.size*2, self.bomb_ratio)
-		print (board)
-		for r in range(self.size):
-			for c in range(self.size*2):
-				but = tk.Button(t, height=2, width=5 , bg='#CCCCCC')
-				but.grid(row=r, column=c)
-				but.row = r
-				but.col = c
-				if self.board_type == 'play' :
-					but.bind('<Button-3>', game.place_flag)
-					but.bind('<Button-1>', game.locate_bomb)
-
 	def create_minesweeper_board(self, height, width, bomb_ratio):
 		board = MinesweeperBoard(height, width, bomb_ratio)
 		self.net_player = NetworkedPlayer("localhost", 80)
@@ -125,12 +102,11 @@ class MinesweeperGameUI(tk.Frame):
 	def left_click_event_handler(self, event):
 		print(event.widget.row, event.widget.col)
 		self.board.step_on_cell((event.widget.row, event.widget.col))
-		import pdb; pdb.set_trace()
-		event.widget.bind('<Leave>', self.hax)
+		if event.widget['image'] == '' :
+			event.widget.config(relief=tk.SUNKEN)
 
 	def hax(self, event):
 		event.widget.config(relief=tk.SUNKEN)
-		event.widget.unbind('<Leave>')
 
 	def fill_board(self, state):
 		print(state)
@@ -147,21 +123,23 @@ class MinesweeperGameUI(tk.Frame):
 					self.but.bind('<ButtonRelease-1>', self.left_click_event_handler)
 		self.update_button_states(state)
 			
-			#self.update()
+
 	def update_button_states(self, state):
 		for x, row in enumerate(state) :
 			for y, col in enumerate(row) :	
 				self.but = self.buttons[(x,y)]
 				if str(col) != 'H':
 					if str(col) == '0':
-						self.but.config(relief=tk.SUNKEN, state=tk.NORMAL, bg = '#EEEEEE')
+						self.but.config(state=tk.NORMAL, bg = '#EEEEEE', relief=tk.SUNKEN)
 					elif str(col) == 'X' :
 						self.but.config(image=self.bomb, width=35, height=35, bg='red')
+					elif str(col) == 'B' :
+						self.but.config(image=self.bomb, width=35, height=35)
 					elif str(col) == 'M' :
 						self.but.config(image=self.flag, width=35, height=35)
 					else :
 						self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
-							bg='#EEEEEE' ,relief=tk.SUNKEN)
+							bg='#EEEEEE', relief=tk.SUNKEN)
 				else :
 					self.but.config(image='', height=2, width=5)
 
@@ -190,7 +168,7 @@ class MinesweeperGame(tk.Frame):
 
 def on_exit():
 	messagebox.showinfo("test", "test")
-	app.destroy()
+	app.destroy() 
 
 app = Minesweeper()
 app.protocol("WM_DELETE_WINDOW", on_exit)
