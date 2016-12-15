@@ -2,6 +2,7 @@ import sys
 from minesweeper.board import Board
 import socket
 import threading
+import re
 
 class ObserverBoard(Board):
     """
@@ -57,3 +58,4 @@ class ObserverBoard(Board):
         :return: None
         """
         self._state = self.player_socket.recv(1024).decode("utf-8")
+        self._state = re.sub("\r\n", "", self._state)

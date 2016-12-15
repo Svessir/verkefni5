@@ -2,7 +2,12 @@ import tkinter as tk   # python3
 from minesweeper.minesweeper_board import MinesweeperBoard
 from PIL import Image, ImageTk
 from tkinter import PhotoImage
-from minesweeperUI import Application
+#from minesweeperUI import Application
+from minesweeper_network.observer_board import ObserverBoard
+from minesweeper_network.networked_player import NetworkedPlayer
+from tkinter import messagebox
+
+
 
 class MinesweeperHeader(tk.Frame):
 	def __init__(self, master):
@@ -59,20 +64,22 @@ class SelectLevelPage(tk.Frame):
 			font=('Helvetica',12))
 		level_label.pack(padx=10, pady=10)
 		small = tk.Button(self, text='8x16', bg='#CCCCCC', 
-			command=lambda: MinesweeperGameUI(self, MinesweeperBoard(8,16,0.15)))
+			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(8,16,0.15)))
 		small.pack()
 		medium = tk.Button(self, text='12x24', bg='#CCCCCC',
-			command=lambda: MinesweeperGameUI(self, MinesweeperBoard(12,24,0.15)))
+			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(12,24,0.15)))
 		medium.pack()
 		large = tk.Button(self, text='16x32', bg='#CCCCCC',
-			command=lambda: MinesweeperGameUI(self, MinesweeperBoard(16,32,0.15)))
+			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(16,32,0.15)))
 		large.pack()
 		back = tk.Button(self, text='Back', bg='#CCCCCC', 
 			command=lambda: controller.show_frame(StartingPage))
 		back.pack()
 		label = tk.Label(self)
 		label.pack()
+		self.net_player = None
 
+	#Never used
 	def create_widgets(self):
 		game = Application()
 		board = MinesweeperBoard(self.size, self.size*2, self.bomb_ratio)
@@ -87,6 +94,11 @@ class SelectLevelPage(tk.Frame):
 					but.bind('<Button-3>', game.place_flag)
 					but.bind('<Button-1>', game.locate_bomb)
 
+	def create_minesweeper_board(self, height, width, bomb_ratio):
+		board = MinesweeperBoard(height, width, bomb_ratio)
+		self.net_player = NetworkedPlayer("localhost", 80)
+		board.add_observer(self.net_player.notify_observers)
+		return board
 
 
 class MinesweeperGameUI(tk.Frame):
@@ -113,6 +125,7 @@ class MinesweeperGameUI(tk.Frame):
 	def left_click_event_handler(self, event):
 		print(event.widget.row, event.widget.col)
 		self.board.step_on_cell((event.widget.row, event.widget.col))
+		import pdb; pdb.set_trace()
 		event.widget.bind('<Leave>', self.hax)
 
 	def hax(self, event):
@@ -132,24 +145,26 @@ class MinesweeperGameUI(tk.Frame):
 					self.buttons[(x,y)] = self.but
 					self.but.bind('<ButtonRelease-3>', self.right_click_event_handler)
 					self.but.bind('<ButtonRelease-1>', self.left_click_event_handler)
-		else:
-			for x, row in enumerate(state) :
-				for y, col in enumerate(row) :	
-					self.but = self.buttons[(x,y)]
-
-					if str(col) != 'H':
-						if str(col) == '0':
-							self.but.config(relief=tk.SUNKEN, state=tk.NORMAL, bg = '#EEEEEE')
-						elif str(col) == 'X' :
-							self.but.config(image=self.bomb, width=35, height=35, bg='red')
-						elif str(col) == 'M' :
-							self.but.config(image=self.flag, width=35, height=35)
-						else :
-							self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
-								bg='#EEEEEE' ,relief=tk.SUNKEN)
-					else :
-						self.but.config(image='', height=2, width=5)
+		self.update_button_states(state)
+			
 			#self.update()
+	def update_button_states(self, state):
+		for x, row in enumerate(state) :
+			for y, col in enumerate(row) :	
+				self.but = self.buttons[(x,y)]
+				if str(col) != 'H':
+					if str(col) == '0':
+						self.but.config(relief=tk.SUNKEN, state=tk.NORMAL, bg = '#EEEEEE')
+					elif str(col) == 'X' :
+						self.but.config(image=self.bomb, width=35, height=35, bg='red')
+					elif str(col) == 'M' :
+						self.but.config(image=self.flag, width=35, height=35)
+					else :
+						self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
+							bg='#EEEEEE' ,relief=tk.SUNKEN)
+				else :
+					self.but.config(image='', height=2, width=5)
+
 
 class ObserverPage(tk.Frame):
 	def __init__(self, master, controller):
@@ -158,6 +173,10 @@ class ObserverPage(tk.Frame):
 		minesweeper_label.pack(padx=10, pady=10)
 		players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
 		players_label.pack(padx=10, pady=10)
+		observe = tk.Button(self, text='Observe', bg='#CCCCCC', 
+			command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 80)))
+		observe.pack()
+
 		back = tk.Button(self, text='Back', bg='#CCCCCC', 
 			command=lambda: controller.show_frame(StartingPage))
 		back.pack()
@@ -169,9 +188,12 @@ class MinesweeperGame(tk.Frame):
 		self.width = size
 		print(size)
 
-
+def on_exit():
+	messagebox.showinfo("test", "test")
+	app.destroy()
 
 app = Minesweeper()
+app.protocol("WM_DELETE_WINDOW", on_exit)
 app.mainloop()
 
 
