@@ -1,5 +1,5 @@
 import sys
-from minesweeper.board import Board
+from minesweeper.board import Board, BoardError
 import socket
 import threading
 import re
@@ -23,19 +23,21 @@ class ObserverBoard(Board):
 
         :param player_ip: The ip address of the player.
         :param player_port: The port number of the player.
-        :raises Exception: if connection or state retrieval fails.
+        :raises BoardError: if connection or state retrieval fails.
         """
         try:
             super(ObserverBoard, self).__init__()
             self.player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.player_socket.connect((player_ip, player_port))
             self._receive_new_state()
+            if not self._state:
+                raise BoardError("Board did not receive a legal state string from server.")
             self.thread = threading.Thread(target=self.client_loop)
             self.thread.daemon = True
             self.is_client_on = False
             self.thread.start()
-        except:
-            print("Exception occurred please handle it.")
+        except Exception as error:
+            raise BoardError("Constructing board failed:{0}".format(str(error)))
 
     def client_loop(self):
         """
@@ -59,12 +61,15 @@ class ObserverBoard(Board):
         and processes the reponse.
         :return: None
         """
-        self._state = self.player_socket.recv(1024).decode("utf-8")
+        state = self.player_socket.recv(1024).decode("utf-8")
 
-        if not self._state:
+        if not state:
             self.shutdown_client()
             sys.exit(-1)
-        self._state = re.sub("\r\n", "", self._state)
+
+        state = re.sub("\r\n", "", state)
+        if self.is_state_valid(state):
+            self._state = state
 
     def shutdown_client(self):
         """
@@ -73,3 +78,17 @@ class ObserverBoard(Board):
         :return: None
         """
         self.is_client_on = False
+
+    def is_state_valid(self, state):
+        """
+        Checks if state string is valid.
+
+        :return: True if valid else False
+        """
+        is_valid = True
+        split = state.split(",")
+        is_valid = is_valid and len(split) == 3
+        is_valid = is_valid and bool(re.findall("continue|loss|win", split[0]))
+        is_valid = is_valid and bool(re.match("[0-9 ]+", split[1]))
+        is_valid = is_valid and bool(re.match("^[0-8HMBX/ ]+$", split[2]))
+        return is_valid

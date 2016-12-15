@@ -95,11 +95,11 @@ if __name__ == "__main__":
     from minesweeper_network.observer_board import ObserverBoard
 
     # Networked player is set up and in production is observing the player board
-    player = NetworkedPlayer("localhost", 80)
+    player = NetworkedPlayer('localhost', 80)
 
     # When the player board updates it notifies player via its observer function
     # This function in return notifies the remote observers
-    player.notify_observers("HHHH/HHHH/HHHH")
+    player.notify_observers("continue,2,HHHH/HHHH/HHHH")
 
     # A remote observer connects to the player
     observer_board = ObserverBoard("localhost", 80)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     # State change happens at the player -> remote observers should be notified
     # -> The ui at remote observer should be notified that is the observer_function
-    player.notify_observers("01HH/1HHH/HHHH")
-    player.notify_observers("01HH/1XHH/HBHH")
+    player.notify_observers("continue,2,01HH/1HHH/HHHH")
+    player.notify_observers("loss,2,01HH/1XHH/HBHH")
     player.shutdown_server()
     input()
