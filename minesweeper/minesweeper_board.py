@@ -28,8 +28,10 @@ class MinesweeperBoard(Board):
         # Inserts bombs
         for i in range(self._number_of_bombs):
             index = randint(0, len(cells) - 1)
-            cells[index].is_bomb = True
+            bomb = cells[index]
+            bomb.is_bomb = True
             cells.remove(cells[index])
+            self._bombs.append(bomb)
         for r in range(rows):
             for c in range(columns):
                 cell = self._cells[r][c]

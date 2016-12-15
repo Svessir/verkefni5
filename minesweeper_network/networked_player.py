@@ -98,3 +98,4 @@ if __name__ == "__main__":
     # -> The ui at remote observer should be notified that is the observer_function
     player.notify_observers("01HH/1HHH/HHHH")
     player.notify_observers("01HH/1XHH/HBHH")
+    input()
