@@ -76,6 +76,7 @@ class MinesweeperBoard(Board):
             if self._get_mark_count_left() < 0:
                 # revert the mark if the flags were depleted.
                 cell.mark_toggle()
+            self._is_game_over = self._is_win()
             self._update_state()
 
 
