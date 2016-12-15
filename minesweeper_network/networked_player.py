@@ -27,6 +27,7 @@ class NetworkedPlayer:
         self.sockets.append(self.server_socket)
         self.thread = threading.Thread(target=self.server_loop)
         self.thread.daemon = True
+        self.is_server_on = False
         self.thread.start()
 
     def server_loop(self):
@@ -37,7 +38,8 @@ class NetworkedPlayer:
 
         :return: None
         """
-        while True:
+        self.is_server_on = True
+        while self.is_server_on:
             ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 10)
             for sock in ready_to_read:
                 if sock == self.server_socket:
@@ -47,6 +49,8 @@ class NetworkedPlayer:
                 else:
                     if sock in self.sockets:
                         self.sockets.remove(sock)
+        self.sockets = [self.server_socket]
+        print("Good Bye!")
         sys.exit(0)
 
     def notify_observers(self, state):
@@ -74,6 +78,15 @@ class NetworkedPlayer:
             if sock in self.sockets:
                 self.sockets.remove(sock)
 
+    def shutdown_server(self):
+        """
+        Shutdown the serving loop.
+        The server might not be shutdown immediately but in few seconds it
+        will eventually.
+        :return: None
+        """
+        self.is_server_on = False
+
 if __name__ == "__main__":
 
     def observer_function(state):
@@ -98,4 +111,5 @@ if __name__ == "__main__":
     # -> The ui at remote observer should be notified that is the observer_function
     player.notify_observers("01HH/1HHH/HHHH")
     player.notify_observers("01HH/1XHH/HBHH")
+    player.shutdown_server()
     input()

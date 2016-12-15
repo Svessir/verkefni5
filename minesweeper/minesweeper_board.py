@@ -23,6 +23,10 @@ class MinesweeperBoard(Board):
         self._bombs = []
         self._cells = [[MinesweeperCell(self) for c in range(columns)] for r in range(rows)]
         self._is_game_over = False
+        self._CONTINUE = "continue"
+        self._WIN = "win"
+        self._LOSS = "loss"
+        self._current_state = self._CONTINUE
         cells = list(chain(*self._cells))
 
         # Inserts bombs
@@ -90,8 +94,9 @@ class MinesweeperBoard(Board):
         :return: None
         """
         old_state = self._state
-        self._state = "/".join(["".join([str(col) for col in row]) for row in self._cells])
-        self._is_game_over = "X" in self._state
+        str_state = "/".join(["".join([str(col) for col in row]) for row in self._cells])
+        str_marks_left = str(self._get_mark_count_left())
+        self._state = ",".join([self._current_state, str_marks_left, str_state])
         if old_state != self._state:
             self._notify_observers()
 
@@ -101,6 +106,8 @@ class MinesweeperBoard(Board):
 
         :return:None
         """
+        self._current_state = self._LOSS
+        self._is_game_over = True
         for bomb in self._bombs:
             bomb.is_hidden = False
             bomb.is_marked = False
@@ -119,4 +126,6 @@ class MinesweeperBoard(Board):
 
         :return: True if the game is won else False.
         """
-        return sum([sum([1 for c in row if c.is_marked and c.is_bomb]) for row in self._cells]) == self._number_of_bombs
+        is_win = sum([sum([1 for c in row if c.is_marked and c.is_bomb]) for row in self._cells]) == self._number_of_bombs
+        self._current_state = self._WIN if is_win else self._current_state
+        return is_win

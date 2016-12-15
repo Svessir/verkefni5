@@ -154,7 +154,7 @@ class ObserverPage(tk.Frame):
 		players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
 		players_label.pack(padx=10, pady=10)
 		observe = tk.Button(self, text='Observe', bg='#CCCCCC', 
-			command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 80)))
+			command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 81)))
 		observe.pack()
 
 		back = tk.Button(self, text='Back', bg='#CCCCCC', 

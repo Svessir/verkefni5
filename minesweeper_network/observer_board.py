@@ -32,6 +32,7 @@ class ObserverBoard(Board):
             self._receive_new_state()
             self.thread = threading.Thread(target=self.client_loop)
             self.thread.daemon = True
+            self.is_client_on = False
             self.thread.start()
         except:
             print("Exception occurred please handle it.")
@@ -42,11 +43,12 @@ class ObserverBoard(Board):
         The loop will wait for activity from the player board
         and notify the observers.
         If the connection is lost to the player board the connection
-        loss will be handled.
+        loss will be handled by turning off the client.
 
         :return: None
         """
-        while True:
+        self.is_client_on = True
+        while self.is_client_on:
             self._receive_new_state()
             self._notify_observers()
         sys.exit(0)
@@ -58,4 +60,16 @@ class ObserverBoard(Board):
         :return: None
         """
         self._state = self.player_socket.recv(1024).decode("utf-8")
+
+        if not self._state:
+            self.shutdown_client()
+            sys.exit(-1)
         self._state = re.sub("\r\n", "", self._state)
+
+    def shutdown_client(self):
+        """
+        Shutdown the client loop.
+
+        :return: None
+        """
+        self.is_client_on = False
