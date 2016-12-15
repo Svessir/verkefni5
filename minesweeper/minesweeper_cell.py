@@ -49,11 +49,12 @@ class MinesweeperCell:
             if self.is_bomb:
                 self.board.explode()
                 self.is_exploded = True
-                return
-            if self._number_of_bomb_neighbours == 0:
-                for neighbour in self._neighbours:
-                    neighbour.is_marked = False
-                    neighbour.step_on()
+            else:
+                self.is_marked = False
+                if self._number_of_bomb_neighbours == 0:
+                    for neighbour in self._neighbours:
+                        neighbour.is_marked = False
+                        neighbour.step_on()
 
     def __str__(self):
         """
