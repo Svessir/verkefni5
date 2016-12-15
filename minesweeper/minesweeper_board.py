@@ -76,6 +76,7 @@ class MinesweeperBoard(Board):
             if self._get_mark_count_left() < 0:
                 # revert the mark if the flags were depleted.
                 cell.mark_toggle()
+            self._is_game_over = self._is_win()
             self._update_state()
 
 
@@ -116,10 +117,3 @@ class MinesweeperBoard(Board):
         :return: True if the game is won else False.
         """
         return sum([sum([1 for c in row if c.is_marked and c.is_bomb]) for row in self._cells]) == self._number_of_bombs
-
-def observer_function(state):
-    rows = state.split("/")
-    for r in rows:
-        print(r)
-    print()
-
