@@ -21,7 +21,7 @@ class Minesweeper(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartingPage, SelectLevelPage, ObserverPage):
+        for F in (StartingPage, SelectLevelPage, ObserverPage):	
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky='nsew')
@@ -85,6 +85,7 @@ class MinesweeperGameUI(tk.Frame):
 		self.buttons = {}
 		self.toolbar = None
 		self.grid = None
+		self.result = None
 		self.bomb_path = "images/bomb.jpg"
 		self.bomb_image = Image.open(self.bomb_path)
 		self.bomb_image = self.bomb_image.resize((35,38), Image.ANTIALIAS)
@@ -123,7 +124,7 @@ class MinesweeperGameUI(tk.Frame):
 		if not self.toolbar:
 			self.toolbar = tk.Frame(self.toplevel, bg='#EEEEEE')
 			self.smile_but = tk.Button(self.toolbar, image=self.smile_cool)
-			self.smile_but.bind('<ButtonRelease-1>', self.dostuff)
+			self.smile_but.bind('<ButtonRelease-1>', lambda e: self.board.reset())
 			self.smile_but.grid(row=0, column=0)
 			self.flag_label = tk.Label(self.toolbar, text=self.number_of_flags, fg='blue')
 			self.flag_label.grid(row=0, column=1, padx=10)
@@ -143,9 +144,8 @@ class MinesweeperGameUI(tk.Frame):
 			self.grid.pack()
 		self.update_button_states(board_info)
 
-	def dostuff(self, event):
-		print('Hommar og lesbiur')
-			
+	def reset_board(self, event):
+		pass
 
 	def update_button_states(self, board_info):
 		terminal, number_of_flags, state = board_info.split(',')
@@ -170,26 +170,21 @@ class MinesweeperGameUI(tk.Frame):
 						self.but.config(text=str(col), state=tk.NORMAL, fg = self.colors[int(col)], 
 							bg='#EEEEEE', relief=tk.SUNKEN, image='', height=2, width=5)
 				else :
-					self.but.config(image='', height=2, width=5)
-		if terminal == 'loss' :
+					self.but.config(image='', height=2, width=5, bg='#CCCCCC', text='', relief=tk.RAISED)
+					self.smile_but.config(image=self.smile_cool)
+					if self.result :
+						self.result.config(text='')
+						self.result.grid(row=0, column=2)
+
+		if terminal == 'loss':
 			#self.on_defeat()
 			self.smile_but.config(image=self.smile_sad)
-			self.defeat = tk.Label(self.toolbar, text='You lost...', fg='red', font=('Helvetica', 16))
-			self.defeat.grid(row=0, column=2, padx=10)
+			self.result = tk.Label(self.toolbar, text='You lost...', fg='red', font=('Helvetica', 16))
+			self.result.grid(row=0, column=2, padx=10)
 		if terminal == 'win' :
 			#self.on_win()
-			self.win = tk.Label(self.toolbar, text='You WON!', fg='green', font=('Helvetica', 16))
-			self.win.grid(row=0, column=2, padx=10)
-
-
-	def on_win(self):
-		result = messagebox.askquestion("Minesweeper", "You won! Do you want to play again", parent=self.toplevel)
-
-	def on_defeat(self):
-		result = messagebox.askquestion("Minesweeper", "You lost.... Do you want to play again", parent=self.toplevel)
-
-
-
+			self.result = tk.Label(self.toolbar, text='You WON!', fg='green', font=('Helvetica', 16))
+			self.result.grid(row=0, column=2, padx=10)
 
 class ObserverPage(tk.Frame):
     def __init__(self, master, controller):
