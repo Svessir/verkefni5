@@ -54,19 +54,37 @@ Class for the elements of the level selection page
 class SelectLevelPage(tk.Frame):
 	def __init__(self, master, controller):
 		tk.Frame.__init__(self, master)
+		self.host_name_string = 'Enter host name...'
+		self.port_name_string = 'Enter port number...'
 		name_label = tk.Label(self, text='Minesweeper', font=('Helvetica', 16))
 		name_label.pack(padx=10, pady=10)
+		connection_label = tk.Label(self, text='To establish a server for observers to connect to.', font=('Helvetica', 10), fg='blue')
+		connection_label.pack(padx=10, pady=2)
+		self.error_label = tk.Label(self, text='Wrong hostname or portnumber!', fg='red')
+		host_entry = tk.Entry(self, bd=1)
+		host_entry.insert(0, self.host_name_string)
+		host_entry.bind('<ButtonRelease-1>', self.on_entry_click)
+		host_entry.config(fg = 'grey')
+		host_entry.pack()
+		self.host_entry = host_entry
+		port_entry = tk.Entry(self)
+		port_entry.insert(0, self.port_name_string)
+		port_entry.bind('<ButtonRelease-1>', self.on_entry_click)
+		port_entry.config(fg = 'grey')
+		port_entry.pack()
+		self.port_entry = port_entry
 		level_label = tk.Label(self, text='Select a board size', 
 			font=('Helvetica',12))
 		level_label.pack(padx=10, pady=10)
+
 		small = tk.Button(self, text='4x8', bg='#CCCCCC', 
-			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(4,8,0.15)))
+			command=lambda: self.create_minesweeper_board(4,8,0.15))
 		small.pack()
 		medium = tk.Button(self, text='8x16', bg='#CCCCCC',
-			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(8,16,0.15)))
+			command=lambda: self.create_minesweeper_board(8,16,0.15))
 		medium.pack()
 		large = tk.Button(self, text='12x24', bg='#CCCCCC',
-			command=lambda: MinesweeperGameUI(self, self.create_minesweeper_board(12,24,0.15)))
+			command=lambda:self.create_minesweeper_board(12,24,0.15))
 		large.pack()
 		back = tk.Button(self, text='Back', bg='#CCCCCC', 
 			command=lambda: controller.show_frame(StartingPage))
@@ -75,11 +93,43 @@ class SelectLevelPage(tk.Frame):
 		label.pack()
 		self.net_player = None
 
+	def on_entry_click(self, event):
+		event.widget.delete(0, "end") 
+		event.widget.insert(0, '') 
+		event.widget.config(text='', fg='black')
+
 	def create_minesweeper_board(self, height, width, bomb_ratio):
+		self.error_label.pack_forget()
 		board = MinesweeperBoard(height, width, bomb_ratio)
-		self.net_player = NetworkedPlayer("localhost", 80)
-		board.add_observer(self.net_player.notify_observers)
-		return board
+		if (self.host_entry.get() == self.host_name_string and self.port_entry.get() == self.port_name_string) or (self.host_entry.get() == '' and self.port_entry.get() == ''):
+			MinesweeperGameUI(self,board)
+		elif self.host_entry.get() == self.host_name_string :
+			try :
+				self.net_player = NetworkedPlayer('', int(self.port_entry.get()))
+				board.add_observer(self.net_player.notify_observers)
+				MinesweeperGameUI(self,board)
+			except  :
+				print('error')
+				self.error_label.pack()
+		elif self.port_entry.get() == self.port_name_string :
+			try :
+				self.net_player = NetworkedPlayer(self.host_entry.get(), '')
+				board.add_observer(self.net_player.notify_observers)
+				MinesweeperGameUI(self,board)
+			except  :
+				print('error')
+				self.error_label.pack()		
+
+		elif self.host_entry.get() != self.host_name_string and self.port_entry.get() != self.port_name_string :
+			print(self.host_entry.get(), self.port_entry.get())
+			try :
+				self.net_player = NetworkedPlayer(self.host_entry.get(), int(self.port_entry.get()))
+				board.add_observer(self.net_player.notify_observers)
+				MinesweeperGameUI(self,board)
+			except  :
+				print('error')
+				self.error_label.pack()
+
 
 
 """
@@ -192,19 +242,52 @@ class MinesweeperGameUI(tk.Frame):
 Class that handles the observer GUI items
 """
 class ObserverPage(tk.Frame):
-    def __init__(self, master, controller):
-        super().__init__(master)
-        minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
-        minesweeper_label.pack(padx=10, pady=10)
-        players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
-        players_label.pack(padx=10, pady=10)
-        observe = tk.Button(self, text='Observe', bg='#CCCCCC',
-                            command=lambda: MinesweeperGameUI(self, ObserverBoard("localhost", 80)))
-        observe.pack()
+	def __init__(self, master, controller):
+		super().__init__(master)
+		self.host_name_string = 'Enter host name...'
+		self.port_name_string = 'Enter port number...'
+		minesweeper_label = tk.Label(self, text='Minesweeper', font=("Helvetica", 16))
+		minesweeper_label.pack(padx=10, pady=10)
+		players_label = tk.Label(self, text='Select a player to observe', font=('Helvetica', 12))
+		players_label.pack(padx=10, pady=10)
+		self.error_label = tk.Label(self, text='Wrong hostname or portnumber!', fg='red')
+		connection_label = tk.Label(self, text='Establish connection to players server', font=('Helvetica', 10), fg='blue')
+		connection_label.pack(padx=10, pady=2)
+		self.error_label = tk.Label(self, text='Wrong hostname or portnumber!', fg='red')
+		host_entry = tk.Entry(self, bd=1)
+		host_entry.insert(0, self.host_name_string)
+		host_entry.bind('<ButtonRelease-1>', self.on_entry_click)
+		host_entry.config(fg = 'grey')
+		host_entry.pack()
+		self.host_entry = host_entry
+		port_entry = tk.Entry(self)
+		port_entry.insert(0, self.port_name_string)
+		port_entry.bind('<ButtonRelease-1>', self.on_entry_click)
+		port_entry.config(fg = 'grey')
+		port_entry.pack()
+		self.port_entry = port_entry
+		observe = tk.Button(self, text='Observe', bg='#CCCCCC',
+		                    command=lambda: self.on_observe())
+		observe.pack()
 
-        back = tk.Button(self, text='Back', bg='#CCCCCC',
-                         command=lambda: controller.show_frame(StartingPage))
-        back.pack()
+		back = tk.Button(self, text='Back', bg='#CCCCCC',
+		                 command=lambda: controller.show_frame(StartingPage))
+		back.pack()
+
+	def on_entry_click(self, event):
+		event.widget.delete(0, "end") 
+		event.widget.insert(0, '') 
+		event.widget.config(text='', fg='black')
+
+
+	def on_observe(self):
+		self.error_label.pack_forget()
+		print(self.host_entry.get(), self.port_entry.get())
+		try :
+			MinesweeperGameUI(self, ObserverBoard(self.host_entry.get(), int(self.port_entry.get())))
+		except Exception as error:
+			print(error)
+			self.error_label.pack()
 
 app = Minesweeper()
 app.mainloop()
