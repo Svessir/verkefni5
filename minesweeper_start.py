@@ -107,7 +107,7 @@ class SelectLevelPage(tk.Frame):
 			try :
 				self.net_player = NetworkedPlayer('', int(self.port_entry.get()))
 				board.add_observer(self.net_player.notify_observers)
-				MinesweeperGameUI(self,board)
+				MinesweeperGameUI(self,board, self.net_player.shutdown_server)
 			except  :
 				print('error')
 				self.error_label.pack()
@@ -115,7 +115,7 @@ class SelectLevelPage(tk.Frame):
 			try :
 				self.net_player = NetworkedPlayer(self.host_entry.get(), '')
 				board.add_observer(self.net_player.notify_observers)
-				MinesweeperGameUI(self,board)
+				MinesweeperGameUI(self,board, self.net_player.shutdown_server)
 			except  :
 				print('error')
 				self.error_label.pack()		
@@ -125,7 +125,7 @@ class SelectLevelPage(tk.Frame):
 			try :
 				self.net_player = NetworkedPlayer(self.host_entry.get(), int(self.port_entry.get()))
 				board.add_observer(self.net_player.notify_observers)
-				MinesweeperGameUI(self,board)
+				MinesweeperGameUI(self,board, self.net_player.shutdown_server)
 			except  :
 				print('error')
 				self.error_label.pack()
@@ -136,10 +136,12 @@ class SelectLevelPage(tk.Frame):
 Class for the game UI
 """
 class MinesweeperGameUI(tk.Frame):
-	def __init__(self, master, board):
+	def __init__(self, master, board, on_close=None):
 		tk.Frame.__init__(self, master)
 		self.board = board
 		self.toplevel = tk.Toplevel(self)
+		self.on_close = on_close
+		self.toplevel.protocol("WM_DELETE_WINDOW", self.shutdown_network_player)
 		self.buttons = {}
 		self.toolbar = None
 		self.grid = None
@@ -238,6 +240,14 @@ class MinesweeperGameUI(tk.Frame):
 			self.result = tk.Label(self.toolbar, text='You WON!', fg='green', font=('Helvetica', 16))
 			self.result.grid(row=0, column=2, padx=10)
 
+	def shutdown_network_player(self):
+		if self.on_close :
+			self.on_close()
+		self.toplevel.destroy()
+
+
+		
+
 """
 Class that handles the observer GUI items
 """
@@ -284,10 +294,12 @@ class ObserverPage(tk.Frame):
 		self.error_label.pack_forget()
 		print(self.host_entry.get(), self.port_entry.get())
 		try :
-			MinesweeperGameUI(self, ObserverBoard(self.host_entry.get(), int(self.port_entry.get())))
+			board = ObserverBoard(self.host_entry.get(), int(self.port_entry.get()))
+			MinesweeperGameUI(self, board, board.shutdown_client)
 		except Exception as error:
 			print(error)
 			self.error_label.pack()
 
 app = Minesweeper()
+app.title('Minesweeper')
 app.mainloop()

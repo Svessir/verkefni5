@@ -55,7 +55,7 @@ class NetworkedPlayer:
         """
         self.is_server_on = True
         while self.is_server_on:
-            ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 10)
+            ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 1)
             for sock in ready_to_read:
                 if sock == self.server_socket:
                     sock_fd, address = self.server_socket.accept()
@@ -100,6 +100,7 @@ class NetworkedPlayer:
         will eventually.
         :return: None
         """
+        print('stuff')
         self.is_server_on = False
 
 if __name__ == "__main__":

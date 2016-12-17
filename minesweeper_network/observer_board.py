@@ -77,6 +77,7 @@ class ObserverBoard(Board):
 
         :return: None
         """
+        print('client stuff')
         self.is_client_on = False
 
     def is_state_valid(self, state):
