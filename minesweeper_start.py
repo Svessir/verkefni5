@@ -144,8 +144,6 @@ class MinesweeperGameUI(tk.Frame):
 			self.grid.pack()
 		self.update_button_states(board_info)
 
-	def reset_board(self, event):
-		pass
 
 	def update_button_states(self, board_info):
 		terminal, number_of_flags, state = board_info.split(',')
