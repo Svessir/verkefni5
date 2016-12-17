@@ -1,14 +1,15 @@
-import tkinter as tk  # python3
+import tkinter as tk
 from minesweeper.minesweeper_board import MinesweeperBoard
 from PIL import Image, ImageTk
 from tkinter import PhotoImage
-# from minesweeperUI import Application
 from minesweeper_network.observer_board import ObserverBoard
 from minesweeper_network.networked_player import NetworkedPlayer
 from tkinter import messagebox
 import time
 
-
+"""
+Class that handles the display frames
+"""
 class Minesweeper(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -32,7 +33,9 @@ class Minesweeper(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
-
+"""
+Class for the elements in the starting page
+"""
 class StartingPage(tk.Frame):
     def __init__(self, master, controller):
         tk.Frame.__init__(self, master)
@@ -45,7 +48,9 @@ class StartingPage(tk.Frame):
                                     command=lambda: controller.show_frame(ObserverPage))
         observer_button.pack()
 
-
+"""
+Class for the elements of the level selection page
+"""
 class SelectLevelPage(tk.Frame):
 	def __init__(self, master, controller):
 		tk.Frame.__init__(self, master)
@@ -77,6 +82,9 @@ class SelectLevelPage(tk.Frame):
 		return board
 
 
+"""
+Class for the game UI
+"""
 class MinesweeperGameUI(tk.Frame):
 	def __init__(self, master, board):
 		tk.Frame.__init__(self, master)
@@ -106,21 +114,19 @@ class MinesweeperGameUI(tk.Frame):
 		board.add_observer(self.fill_board)
 
 	def right_click_event_handler(self, event):
-		print(event.widget.row, event.widget.col)
 		self.board.mark_cell_toggle((event.widget.row, event.widget.col))
 
 	def left_click_event_handler(self, event):
-		print(event.widget.row, event.widget.col)
 		self.board.step_on_cell((event.widget.row, event.widget.col))
 		if event.widget['image'] == '' :
 			self.after(5, lambda: event.widget.config(relief=tk.SUNKEN))
 			
-
+	"""
+	Inintializes the game-grid and all its elements
+	"""
 	def fill_board(self, board_info):
 		terminal, self.number_of_flags, state = board_info.split(',')
-		print(terminal, self.number_of_flags)
 		state = state.split('/')
-		print(state)
 		if not self.toolbar:
 			self.toolbar = tk.Frame(self.toplevel, bg='#EEEEEE')
 			self.smile_but = tk.Button(self.toolbar, image=self.smile_cool)
@@ -175,15 +181,16 @@ class MinesweeperGameUI(tk.Frame):
 						self.result.grid(row=0, column=2)
 
 		if terminal == 'loss':
-			#self.on_defeat()
 			self.smile_but.config(image=self.smile_sad)
 			self.result = tk.Label(self.toolbar, text='You lost...', fg='red', font=('Helvetica', 16))
 			self.result.grid(row=0, column=2, padx=10)
 		if terminal == 'win' :
-			#self.on_win()
 			self.result = tk.Label(self.toolbar, text='You WON!', fg='green', font=('Helvetica', 16))
 			self.result.grid(row=0, column=2, padx=10)
 
+"""
+Class that handles the observer GUI items
+"""
 class ObserverPage(tk.Frame):
     def __init__(self, master, controller):
         super().__init__(master)
