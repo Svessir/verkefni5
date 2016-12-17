@@ -88,7 +88,6 @@ class MinesweeperBoard(Board):
         """
         old_state = self._state
         str_state = "/".join(["".join([str(col) for col in row]) for row in self._cells])
-        print(str_state)
         str_marks_left = str(self._get_mark_count_left())
         self._state = ",".join([self._current_state, str_marks_left, str_state])
         if old_state != self._state:

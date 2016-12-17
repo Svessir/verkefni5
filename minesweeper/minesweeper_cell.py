@@ -64,7 +64,6 @@ class MinesweeperCell:
         :return: None
         """
         self._number_of_bomb_neighbours = sum([1 for neighbour in self._neighbours if neighbour.is_bomb])
-        print(self._number_of_bomb_neighbours)
 
     def __str__(self):
         """
