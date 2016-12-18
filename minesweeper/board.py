@@ -2,8 +2,12 @@ class BoardError(Exception):
     """
     Error class dedicated to Board errors
     """
-    def __init__(self, msg):
+    def __init__(self, msg, cause=None):
         super(BoardError, self).__init__(msg)
+        self.cause = cause
+
+    def __str__(self):
+        return str(self.cause) if self.cause else super().__str__()
 
 class Board:
     """

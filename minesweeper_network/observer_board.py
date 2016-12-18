@@ -4,6 +4,7 @@ import socket
 import threading
 import re
 
+
 class ObserverBoard(Board):
     """
     The observer board does not implement the
@@ -29,7 +30,7 @@ class ObserverBoard(Board):
             super(ObserverBoard, self).__init__()
             self.player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.player_socket.connect((player_ip, player_port))
-            self._receive_new_state()
+            self._receive_new_state(5)
             if not self._state:
                 raise BoardError("Board did not receive a legal state string from server.")
             self.thread = threading.Thread(target=self.client_loop)
@@ -37,7 +38,7 @@ class ObserverBoard(Board):
             self.is_client_on = False
             self.thread.start()
         except Exception as error:
-            raise BoardError("Constructing board failed:{0}".format(str(error)))
+            raise BoardError("Constructing board failed:{0}".format(str(error)), error)
 
     def client_loop(self):
         """
@@ -55,21 +56,30 @@ class ObserverBoard(Board):
             self._notify_observers()
         sys.exit(0)
 
-    def _receive_new_state(self):
+    def _receive_new_state(self, timeout=None):
         """
         waits for new state update from player
-        and processes the reponse.
+        and processes the response.
         :return: None
         """
-        state = self.player_socket.recv(1024).decode("utf-8")
+        try:
+            self.player_socket.settimeout(timeout)
+            state = self.player_socket.recv(1024).decode("utf-8")
 
-        if not state:
+            if not state:
+                if self._state:
+                    state_end = self._state.split(",", 1)[1]
+                    self._state = "connection_loss,{0}".format(state_end)
+                    self._notify_observers()
+                self.shutdown_client()
+                sys.exit(-1)
+
+            state = re.sub("\r\n", "", state)
+            if self.is_state_valid(state):
+                self._state = state
+        except ConnectionAbortedError as error:
             self.shutdown_client()
-            sys.exit(-1)
-
-        state = re.sub("\r\n", "", state)
-        if self.is_state_valid(state):
-            self._state = state
+            sys.exit(0)
 
     def shutdown_client(self):
         """
@@ -77,8 +87,8 @@ class ObserverBoard(Board):
 
         :return: None
         """
-        print('client stuff')
         self.is_client_on = False
+        self.player_socket.close()
 
     def is_state_valid(self, state):
         """

@@ -3,6 +3,7 @@ import socket
 import select
 import threading
 
+
 class NetworkedPlayerError(Exception):
     """
     Error class dedicated to Networked Player errors
@@ -14,6 +15,7 @@ class NetworkedPlayerError(Exception):
         :param msg: The message of this error.
         """
         super(NetworkedPlayerError, self).__init__(msg)
+
 
 class NetworkedPlayer:
     """
@@ -56,6 +58,8 @@ class NetworkedPlayer:
         self.is_server_on = True
         while self.is_server_on:
             ready_to_read, ready_to_write, in_error = select.select(self.sockets, [], [], 1)
+            if not self.is_server_on:
+                break
             for sock in ready_to_read:
                 if sock == self.server_socket:
                     sock_fd, address = self.server_socket.accept()
@@ -65,7 +69,6 @@ class NetworkedPlayer:
                     if sock in self.sockets:
                         self.sockets.remove(sock)
         self.sockets = [self.server_socket]
-        print("Good Bye!")
         sys.exit(0)
 
     def notify_observers(self, state):
@@ -91,6 +94,7 @@ class NetworkedPlayer:
             sock.send(bytes(self.state, "ascii"))
         except:
             if sock in self.sockets:
+                sock.close()
                 self.sockets.remove(sock)
 
     def shutdown_server(self):
@@ -100,8 +104,9 @@ class NetworkedPlayer:
         will eventually.
         :return: None
         """
-        print('stuff')
         self.is_server_on = False
+        for sock in self.sockets:
+            sock.close()
 
 if __name__ == "__main__":
 

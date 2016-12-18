@@ -3,6 +3,7 @@ from minesweeper.minesweeper_cell import MinesweeperCell
 from random import randint
 from itertools import chain
 
+
 class MinesweeperBoard(Board):
     """
     Implements full logic of minesweeper
